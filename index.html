@@ -299,7 +299,7 @@
         <source id="stop-audio-source" src="" type="audio/mpeg">
       </audio>
 
-      <!-- Przycisk Mediolanu po odsłuchaniu całości -->
+      <!-- Przycisk Mediolanu po odsłuchaniu ostatniego punktu -->
       <div id="btn-milan" class="milan-banner">
         ➔ Gratulacje! Kolejny cel: MEDIOLAN
       </div>
@@ -390,18 +390,25 @@
     const stopAudioSource = document.getElementById('stop-audio-source');
     const btnMilan = document.getElementById('btn-milan');
 
-    // 1. Naturalne odblokowanie po zakończeniu odsłuchu wstępu
+    // 1. Naturalne zakończenie wstępu
     introAudio.addEventListener('ended', enableMapButton);
 
-    // 2. Ręczne odblokowanie z kodem PIN 1410
+    // 2. Obsługa kodów PIN
     btnSkipIntro.addEventListener('click', () => {
-      const pin = prompt("Podaj kod odblokowujący wstęp:");
+      const pin = prompt("Podaj kod PIN:");
       if (pin === "1410") {
+        // Zwykłe pominięcie: odblokowuje mapę od punktu 1
         enableMapButton();
-        // Opcjonalnie: od razu przejdź na mapę
         introScreen.style.display = 'none';
         mapScreen.style.display = 'flex';
-        initMap();
+        initMap(1);
+      } else if (pin === "9892") {
+        // Tryb mistrzowski: wszystkie punkty odblokowane, przeskok od razu do punktu 10
+        unlockedUpTo = stops.length; // odblokuj wszystkie 10
+        enableMapButton();
+        introScreen.style.display = 'none';
+        mapScreen.style.display = 'flex';
+        initMap(10); // ustaw od razu przystanek 10
       } else if (pin !== null) {
         alert("❌ Nieprawidłowy kod PIN!");
       }
@@ -415,54 +422,53 @@
     btnStartMap.addEventListener('click', () => {
       introScreen.style.display = 'none';
       mapScreen.style.display = 'flex';
-      initMap();
+      initMap(1);
     });
 
-    function initMap() {
-      if (map) return;
+    function initMap(startPointId = 1) {
+      if (!map) {
+        map = L.map('map').setView([44.4938, 11.3436], 14);
 
-      map = L.map('map').setView([44.4938, 11.3436], 14);
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; OpenStreetMap contributors',
+          maxZoom: 19
+        }).addTo(map);
 
-      // Czysty kafelek OpenStreetMap (darmowy i bez kluczy)
-      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors',
-        maxZoom: 19
-      }).addTo(map);
+        const pathCoords = stops.map(s => s.coords);
+        L.polyline(pathCoords, {
+          color: '#c2410c',
+          weight: 4,
+          dashArray: '6, 8',
+          opacity: 0.8
+        }).addTo(map);
 
-      const pathCoords = stops.map(s => s.coords);
-      L.polyline(pathCoords, {
-        color: '#c2410c',
-        weight: 4,
-        dashArray: '6, 8',
-        opacity: 0.8
-      }).addTo(map);
+        stops.forEach((stop) => {
+          const markerEl = document.createElement('div');
+          markerEl.className = 'custom-marker';
+          markerEl.id = `marker-${stop.id}`;
+          markerEl.innerText = stop.id;
 
-      stops.forEach((stop) => {
-        const markerEl = document.createElement('div');
-        markerEl.className = 'custom-marker';
-        markerEl.id = `marker-${stop.id}`;
-        markerEl.innerText = stop.id;
+          const icon = L.divIcon({
+            html: markerEl,
+            className: '',
+            iconSize: [28, 28]
+          });
 
-        const icon = L.divIcon({
-          html: markerEl,
-          className: '',
-          iconSize: [28, 28]
+          const marker = L.marker(stop.coords, { icon: icon }).addTo(map);
+          marker.on('click', () => {
+            if (stop.id <= unlockedUpTo) {
+              selectStop(stop.id);
+            } else {
+              alert(`🔒 Ten punkt jest jeszcze zablokowany! Wysłuchaj najpierw punktu ${unlockedUpTo}.`);
+            }
+          });
+
+          markers.push(marker);
         });
-
-        const marker = L.marker(stop.coords, { icon: icon }).addTo(map);
-        marker.on('click', () => {
-          if (stop.id <= unlockedUpTo) {
-            selectStop(stop.id);
-          } else {
-            alert(`🔒 Ten punkt jest jeszcze zablokowany! Wysłuchaj najpierw punktu ${unlockedUpTo}.`);
-          }
-        });
-
-        markers.push(marker);
-      });
+      }
 
       updateMarkersUI();
-      selectStop(1);
+      selectStop(startPointId);
     }
 
     function selectStop(id) {
@@ -489,28 +495,28 @@
 
         if (s.id === currentSelected) {
           el.classList.add('marker-active');
-        } else if (s.id < unlockedUpTo) {
+        } else if (s.id <= unlockedUpTo) {
           el.classList.add('marker-completed');
-        } else if (s.id === unlockedUpTo) {
-          el.classList.add('marker-active');
         } else {
           el.classList.add('marker-locked');
         }
       });
     }
 
+    // Odsłuchanie punktu
     stopAudio.addEventListener('ended', () => {
-      if (currentSelected === unlockedUpTo && unlockedUpTo < stops.length) {
-        unlockedUpTo++;
-        selectStop(unlockedUpTo);
-      } else if (unlockedUpTo === stops.length) {
+      if (currentSelected === stops.length) {
+        // Odsłuchano ostatni 10. punkt – pojawia się przycisk Mediolan
         btnMilan.style.display = 'block';
         btnMilan.scrollIntoView({ behavior: 'smooth' });
+      } else if (currentSelected === unlockedUpTo && unlockedUpTo < stops.length) {
+        unlockedUpTo++;
+        selectStop(unlockedUpTo);
       }
     });
 
     btnMilan.addEventListener('click', () => {
-      alert("Rozpoczynamy przygotowanie etapu Mediolan!");
+      alert("Świetnie! Kolejny etap podróży: MEDIOLAN.");
     });
   </script>
 </body>
