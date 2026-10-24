@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Przewodnik Audio: Bolonia</title>
+  <title>Przewodnik Audio: Bolonia & Mediolan</title>
   
   <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
@@ -18,6 +18,8 @@
       --text-muted: #94a3b8;
       --gold: #f59e0b;
       --border: #334155;
+      --italo: #8b0000;
+      --italo-accent: #ff2a2a;
     }
 
     * {
@@ -36,8 +38,8 @@
       overflow-x: hidden;
     }
 
-    /* Widok 1: Strona powitalna ze wstępem */
-    #intro-screen {
+    /* WIDOK: EKRANY POWITALNE */
+    .screen-view {
       flex: 1;
       display: flex;
       flex-direction: column;
@@ -45,7 +47,17 @@
       justify-content: center;
       padding: 24px;
       text-align: center;
+      min-height: 100vh;
+    }
+
+    #bologna-intro-screen {
       background: radial-gradient(circle at top, #331d16 0%, #0f172a 75%);
+    }
+
+    /* Widok ITALO Mediolan */
+    #milan-train-screen {
+      display: none;
+      background: radial-gradient(circle at top, #4a0d0d 0%, #0f172a 80%);
     }
 
     .badge {
@@ -62,6 +74,12 @@
       border: 1px solid rgba(234, 88, 12, 0.3);
     }
 
+    .badge-italo {
+      background: rgba(255, 42, 42, 0.2);
+      color: #ff6b6b;
+      border: 1px solid rgba(255, 42, 42, 0.4);
+    }
+
     h1 {
       font-size: 2.2rem;
       line-height: 1.2;
@@ -75,7 +93,55 @@
       font-size: 1rem;
       max-width: 480px;
       line-height: 1.6;
-      margin-bottom: 32px;
+      margin-bottom: 24px;
+    }
+
+    /* Karta pociągu ITALO */
+    .train-hero {
+      width: 100%;
+      max-width: 420px;
+      background: linear-gradient(135deg, rgba(139, 0, 0, 0.6) 0%, rgba(30, 41, 59, 0.8) 100%);
+      border: 1px solid rgba(255, 68, 68, 0.4);
+      border-radius: 20px;
+      padding: 20px;
+      margin-bottom: 24px;
+      box-shadow: 0 10px 30px rgba(139, 0, 0, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .train-art {
+      width: 100%;
+      height: 110px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .train-art svg {
+      width: 100%;
+      height: 100%;
+      filter: drop-shadow(0 4px 10px rgba(0,0,0,0.5));
+    }
+
+    .train-speed-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      font-weight: 800;
+      color: #fca5a5;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 6px;
+    }
+
+    .train-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      margin-bottom: 4px;
+      color: #fff;
     }
 
     .player-card {
@@ -87,7 +153,7 @@
       border-radius: 20px;
       border: 1px solid var(--border);
       box-shadow: 0 10px 25px -5px rgba(0,0,0,0.4);
-      margin-bottom: 28px;
+      margin-bottom: 24px;
     }
 
     .player-title {
@@ -128,16 +194,22 @@
       transition: all 0.2s ease;
     }
 
+    .btn-action-italo {
+      background: linear-gradient(135deg, #b91c1c 0%, #7f1d1d 100%);
+      box-shadow: 0 4px 18px rgba(185, 28, 28, 0.5);
+      border: 1px solid rgba(254, 202, 202, 0.2);
+    }
+
     .btn-action:disabled {
-      background: #334155;
-      color: #64748b;
-      box-shadow: none;
+      background: #334155 !important;
+      color: #64748b !important;
+      box-shadow: none !important;
       cursor: not-allowed;
       border: 1px solid rgba(255,255,255,0.05);
     }
 
     .btn-skip {
-      margin-top: 16px;
+      margin-top: 14px;
       background: none;
       border: none;
       color: var(--text-muted);
@@ -146,7 +218,7 @@
       text-decoration: underline;
     }
 
-    /* Widok 2: Interaktywna mapa i panel przystanków */
+    /* WIDOK MAPY */
     #map-screen {
       display: none;
       flex-direction: column;
@@ -160,24 +232,61 @@
       z-index: 1;
     }
 
+    /* Pływający pasek nawigacji miasta u góry mapy */
+    .city-switch-bar {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      z-index: 1000;
+      display: flex;
+      gap: 8px;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(12px);
+      padding: 6px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+
+    .btn-city {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-weight: 700;
+      font-size: 0.85rem;
+      padding: 6px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .btn-city.active {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-city.milan-tab.active {
+      background: #b91c1c;
+    }
+
+    /* Dolny panel odtwarzania */
     .stop-panel {
       position: absolute;
       bottom: 0;
       left: 0;
       right: 0;
-      background: rgba(15, 23, 42, 0.95);
+      background: rgba(15, 23, 42, 0.96);
       backdrop-filter: blur(16px);
       border-top: 1px solid var(--border);
-      padding: 20px 20px 28px 20px;
+      padding: 18px 20px 24px 20px;
       z-index: 1000;
-      box-shadow: 0 -10px 30px rgba(0,0,0,0.5);
+      box-shadow: 0 -10px 30px rgba(0,0,0,0.6);
     }
 
     .stop-header {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
     }
 
     .stop-badge {
@@ -192,7 +301,7 @@
       font-size: 1.15rem;
       font-weight: 700;
       line-height: 1.3;
-      max-width: 80%;
+      max-width: 82%;
     }
 
     .step-counter {
@@ -204,19 +313,28 @@
       color: #cbd5e1;
     }
 
-    .milan-banner {
+    .next-stage-banner {
       display: none;
-      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
       color: #0f172a;
       padding: 16px 20px;
       border-radius: 14px;
       text-align: center;
       font-weight: 800;
-      font-size: 1.1rem;
-      margin-top: 14px;
+      font-size: 1.05rem;
+      margin-top: 12px;
       cursor: pointer;
-      box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
       animation: pulse 2s infinite;
+    }
+
+    .milan-banner {
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+    }
+
+    .bergamo-banner {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+      color: white;
     }
 
     @keyframes pulse {
@@ -224,7 +342,7 @@
       50% { transform: scale(1.02); }
     }
 
-    /* Style znaczników mapy */
+    /* Style znaczników Leaflet */
     .custom-marker {
       display: flex;
       align-items: center;
@@ -239,14 +357,16 @@
 
     .marker-locked {
       background: #475569 !important;
-      opacity: 0.6;
+      opacity: 0.55;
     }
 
     .marker-active {
-      background: #c2410c !important;
       transform: scale(1.15);
       animation: bounce 1s infinite alternate;
     }
+
+    .marker-active-bologna { background: #c2410c !important; }
+    .marker-active-milan { background: #dc2626 !important; }
 
     .marker-completed {
       background: #16a34a !important;
@@ -260,30 +380,76 @@
 </head>
 <body>
 
-  <!-- Widok 1: Wstęp do wycieczki -->
-  <div id="intro-screen">
-    <div class="badge">Włochy 2026 • Etap 1</div>
+  <!-- EKRAN 1: Wstęp do Bolonii -->
+  <div id="bologna-intro-screen" class="screen-view">
+    <div class="badge">Włochy 2026 • Dzień 1</div>
     <h1>Bolonia</h1>
     <p class="subtitle">Wprowadzenie do miasta czerwonych portyków, smaku i najstarszego uniwersytetu.</p>
 
     <div class="player-card">
       <div class="player-title">Wstęp do Bolonii</div>
       <div class="player-desc">Odsłuchaj nagranie wprowadzające, aby odblokować mapę spaceru</div>
-      <audio id="intro-audio" controls>
+      <audio id="bologna-intro-audio" controls>
         <source src="Bolonia wstep.mp3" type="audio/mpeg">
         Twoja przeglądarka nie obsługuje dźwięku.
       </audio>
     </div>
 
-    <button id="btn-start-map" class="btn-action" disabled>
-      <span>Otwórz mapę zwiedzania</span>
+    <button id="btn-start-bologna" class="btn-action" disabled>
+      <span>Otwórz mapę Bolonii</span>
       <span>🔒</span>
     </button>
-    <button id="btn-skip-intro" class="btn-skip">Pomiń wstęp (wymagany kod PIN)</button>
+    <button id="btn-skip-bologna" class="btn-skip">Pomiń wstęp (wymagany kod PIN)</button>
   </div>
 
-  <!-- Widok 2: Interaktywna mapa ze spacerem -->
+  <!-- EKRAN 2: Przejazd ITALO do Mediolanu -->
+  <div id="milan-train-screen" class="screen-view">
+    <div class="badge badge-italo">Frecciarossa & Italo • 300 km/h</div>
+    
+    <div class="train-hero">
+      <div class="train-speed-tag">🚄 Prędkość: 300 km/h • Trasa: 60 minut</div>
+      <div class="train-art">
+        <!-- SVG stylizowane na włoski aerodynamiczny pociąg Italo -->
+        <svg viewBox="0 0 450 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M10 80 H280 Q360 80 400 65 L430 45 Q445 35 425 35 H10 Z" fill="#8B0000"/>
+          <path d="M10 80 H280 Q360 80 400 65 L430 45 H10 Z" fill="#B22222"/>
+          <path d="M310 42 L390 42 Q415 42 410 50 L385 55 H310 Z" fill="#1E293B" stroke="#000" stroke-width="2"/>
+          <rect x="50" y="42" width="45" height="15" rx="3" fill="#E2E8F0" opacity="0.9"/>
+          <rect x="110" y="42" width="45" height="15" rx="3" fill="#E2E8F0" opacity="0.9"/>
+          <rect x="170" y="42" width="45" height="15" rx="3" fill="#E2E8F0" opacity="0.9"/>
+          <rect x="230" y="42" width="45" height="15" rx="3" fill="#E2E8F0" opacity="0.9"/>
+          <path d="M10 65 H340 L370 60 H10 Z" fill="#F59E0B"/>
+          <line x1="5" y1="85" x2="440" y2="85" stroke="#475569" stroke-width="4" stroke-dasharray="16 10"/>
+        </svg>
+      </div>
+      <div class="train-title">Bolonia ➔ Mediolan</div>
+      <div style="font-size: 0.85rem; color: #cbd5e1;">Opowieść do odsłuchania w trakcie przejazdu pociągiem</div>
+    </div>
+
+    <div class="player-card">
+      <div class="player-title">Wrota Lombardii: Mediolan</div>
+      <div class="player-desc">Odsłuchaj wstęp, by odblokować mapę i trasę zwiedzania Mediolanu</div>
+      <audio id="milan-intro-audio" controls>
+        <source src="MEDIOLAN WSTĘP.mp3" type="audio/mpeg">
+        Twoja przeglądarka nie obsługuje dźwięku.
+      </audio>
+    </div>
+
+    <button id="btn-start-milan-map" class="btn-action btn-action-italo" disabled>
+      <span>Rozpocznij Mediolan</span>
+      <span>🔒</span>
+    </button>
+    <button id="btn-skip-milan" class="btn-skip">Pomiń wstęp (wymagany kod PIN)</button>
+  </div>
+
+  <!-- WIDOK 3: WSPÓLNA INTERAKTYWNA MAPA -->
   <div id="map-screen">
+    <!-- Przełącznik miast u góry -->
+    <div class="city-switch-bar">
+      <button id="tab-bologna" class="btn-city active">Bolonia</button>
+      <button id="tab-milan" class="btn-city milan-tab" style="display: none;">Mediolan</button>
+    </div>
+
     <div id="map"></div>
 
     <div class="stop-panel">
@@ -299,9 +465,14 @@
         <source id="stop-audio-source" src="" type="audio/mpeg">
       </audio>
 
-      <!-- Przycisk Mediolanu po odsłuchaniu ostatniego punktu -->
-      <div id="btn-milan" class="milan-banner">
-        ➔ Gratulacje! Kolejny cel: MEDIOLAN
+      <!-- Przycisk przejścia do Mediolanu (po 10. punkcie Bolonii) -->
+      <div id="btn-to-milan" class="next-stage-banner milan-banner">
+        🚄 Wsiądź do pociągu ITALO: Kierunek MEDIOLAN ➔
+      </div>
+
+      <!-- Przycisk finałowy: Bergamo Dzień 2 (po 6. punkcie Mediolanu) -->
+      <div id="btn-to-bergamo" class="next-stage-banner bergamo-banner">
+        ⭐ Gratulacje! Kolejny cel: BERGAMO (Dzień drugi) ➔
       </div>
     </div>
   </div>
@@ -309,193 +480,245 @@
   <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    const stops = [
-      {
-        id: 1,
-        title: "Wzgórze z widokiem",
-        coords: [44.4815, 11.3413],
-        file: "PRZYSTANEK 1 Wzgórze z widokiem.mp3"
-      },
-      {
-        id: 2,
-        title: "Poranek na Via Castiglione i Piekarnia Forno Brisa",
-        coords: [44.4891, 11.3465],
-        file: "PRZYSTANEK 2 Poranek na Via Castiglione i Piekarnia Forno Brisa.mp3"
-      },
-      {
-        id: 3,
-        title: "Palazzo dell’Archiginnasio – Śladami Polaków",
-        coords: [44.4920, 11.3436],
-        file: "PRZYSTANEK 3 Palazzo dell’Archiginnasio – Śladami Polaków i Teatr Ludzkiego Ciała.mp3"
-      },
-      {
-        id: 4,
-        title: "Piazza Maggiore i Urząd Miasta",
-        coords: [44.4938, 11.3429],
-        file: "PRZYSTANEK 4 Piazza Maggiore i Urząd Miasta – Polityka, Kościół i Sekrety Władzy.mp3"
-      },
-      {
-        id: 5,
-        title: "Fontanna Neptuna i Średniowieczny Telefon",
-        coords: [44.4942, 11.3431],
-        file: "PRZYSTANEK 5 Fontanna Neptuna i Średniowieczny Telefon Bezprzewodowy.mp3"
-      },
-      {
-        id: 6,
-        title: "Le Due Torri (Dwie Wieże) – Manhattan",
-        coords: [44.4943, 11.3466],
-        file: "PRZYSTANEK 6 Le Due Torri (Dwie Wieże) – Średniowieczny Manhattan.mp3"
-      },
-      {
-        id: 7,
-        title: "Mò Mortadella Lab – Hołd dla Emilii",
-        coords: [44.4981, 11.3444],
-        file: "PRZYSTANEK 7 Mò Mortadella Lab – Hołd dla Królowej Emilii.mp3"
-      },
-      {
-        id: 8,
-        title: "Finestrella di Via Piella – Podziemna Wenecja",
-        coords: [44.4996, 11.3449],
-        file: "PRZYSTANEK 8 Finestrella di Via Piella – Podziemna Wenecja.mp3"
-      },
-      {
-        id: 9,
-        title: "Park Montagnola i Schody Pincio",
-        coords: [44.5011, 11.3457],
-        file: "PRZYSTANEK 9 Park Montagnola i Schody Pincio – Od Zamku Papieży do Napoleona.mp3"
-      },
-      {
-        id: 10,
-        title: "Bologna Centrale – Zegar, który zatrzymał czas",
-        coords: [44.5058, 11.3433],
-        file: "PRZYSTANEK 10 Bologna Centrale – Zegar, który zatrzymał czas.mp3"
-      }
+    // DANE: 10 PUNKTÓW BOLONII
+    const bolognaStops = [
+      { id: 1, title: "Wzgórze z widokiem", coords: [44.4815, 11.3413], file: "PRZYSTANEK 1 Wzgórze z widokiem.mp3" },
+      { id: 2, title: "Poranek na Via Castiglione i Forno Brisa", coords: [44.4891, 11.3465], file: "PRZYSTANEK 2 Poranek na Via Castiglione i Piekarnia Forno Brisa.mp3" },
+      { id: 3, title: "Palazzo dell’Archiginnasio – Śladami Polaków", coords: [44.4920, 11.3436], file: "PRZYSTANEK 3 Palazzo dell’Archiginnasio – Śladami Polaków i Teatr Ludzkiego Ciała.mp3" },
+      { id: 4, title: "Piazza Maggiore i Urząd Miasta", coords: [44.4938, 11.3429], file: "PRZYSTANEK 4 Piazza Maggiore i Urząd Miasta – Polityka, Kościół i Sekrety Władzy.mp3" },
+      { id: 5, title: "Fontanna Neptuna i Średniowieczny Telefon", coords: [44.4942, 11.3431], file: "PRZYSTANEK 5 Fontanna Neptuna i Średniowieczny Telefon Bezprzewodowy.mp3" },
+      { id: 6, title: "Le Due Torri (Dwie Wieże) – Manhattan", coords: [44.4943, 11.3466], file: "PRZYSTANEK 6 Le Due Torri (Dwie Wieże) – Średniowieczny Manhattan.mp3" },
+      { id: 7, title: "Mò Mortadella Lab – Hołd dla Emilii", coords: [44.4981, 11.3444], file: "PRZYSTANEK 7 Mò Mortadella Lab – Hołd dla Królowej Emilii.mp3" },
+      { id: 8, title: "Finestrella di Via Piella – Podziemna Wenecja", coords: [44.4996, 11.3449], file: "PRZYSTANEK 8 Finestrella di Via Piella – Podziemna Wenecja.mp3" },
+      { id: 9, title: "Park Montagnola i Schody Pincio", coords: [44.5011, 11.3457], file: "PRZYSTANEK 9 Park Montagnola i Schody Pincio – Od Zamku Papieży do Napoleona.mp3" },
+      { id: 10, title: "Bologna Centrale – Zegar, który zatrzymał czas", coords: [44.5058, 11.3433], file: "PRZYSTANEK 10 Bologna Centrale – Zegar, który zatrzymał czas.mp3" }
     ];
 
-    let unlockedUpTo = 1;
-    let currentSelected = 1;
+    // DANE: 6 PUNKTÓW MEDIOLANU (Dokładnie wg Twoich plików MP3)
+    const milanStops = [
+      { id: 1, title: "Milano Centrale – Kolos ze stali i Peron 21", coords: [45.4871, 9.2048], file: "PRZYSTANEK 1 Milano Centrale – Kolos ze stali i Peron 21.mp3" },
+      { id: 2, title: "Piazza Gae Aulenti i Bosco Verticale", coords: [45.4836, 9.1896], file: "PRZYSTANEK 2 Piazza Gae Aulenti i Bosco Verticale (Pionowy Las).mp3" },
+      { id: 3, title: "Artystyczna Brera – Zaułki Bohemy i Zapach Kawy", coords: [45.4719, 9.1882], file: "PRZYSTANEK 3 Artystyczna Brera – Zaułki Bohemy i Zapach Kawy.mp3" },
+      { id: 4, title: "Castello Sforzesco – Renesansowa Twierdza i Bona", coords: [45.4704, 9.1793], file: "PRZYSTANEK 4 Castello Sforzesco – Renesansowa Twierdza i Ślad Królowej Bony.mp3" },
+      { id: 5, title: "Piazza della Scala i Galeria Vittorio Emanuele II", coords: [45.4674, 9.1895], file: "PRZYSTANEK 5 Piazza della Scala i Galeria Vittorio Emanuele II.mp3" },
+      { id: 6, title: "Piazza del Duomo – Gotycka Korona Mediolanu", coords: [45.4641, 9.1919], file: "PRZYSTANEK 6 Piazza del Duomo – Gotycka Korona Mediolanu.mp3" }
+    ];
+
+    // ZMIENNE STANU
+    let currentCity = 'bologna'; // 'bologna' lub 'milan'
+    let bolognaUnlocked = 1;
+    let milanUnlocked = 1;
+    let currentSelectedId = 1;
     let markers = [];
     let map = null;
+    let routeLine = null;
 
-    const introAudio = document.getElementById('intro-audio');
-    const btnStartMap = document.getElementById('btn-start-map');
-    const btnSkipIntro = document.getElementById('btn-skip-intro');
-    const introScreen = document.getElementById('intro-screen');
+    // ELEMENTY DOM
+    const bolognaIntroScreen = document.getElementById('bologna-intro-screen');
+    const bolognaIntroAudio = document.getElementById('bologna-intro-audio');
+    const btnStartBologna = document.getElementById('btn-start-bologna');
+    const btnSkipBologna = document.getElementById('btn-skip-bologna');
+
+    const milanTrainScreen = document.getElementById('milan-train-screen');
+    const milanIntroAudio = document.getElementById('milan-intro-audio');
+    const btnStartMilanMap = document.getElementById('btn-start-milan-map');
+    const btnSkipMilan = document.getElementById('btn-skip-milan');
+
     const mapScreen = document.getElementById('map-screen');
+    const tabBologna = document.getElementById('tab-bologna');
+    const tabMilan = document.getElementById('tab-milan');
 
     const panelBadge = document.getElementById('panel-badge');
     const panelTitle = document.getElementById('panel-title');
     const panelCounter = document.getElementById('panel-counter');
     const stopAudio = document.getElementById('stop-audio');
     const stopAudioSource = document.getElementById('stop-audio-source');
-    const btnMilan = document.getElementById('btn-milan');
 
-    // 1. Naturalne zakończenie wstępu
-    introAudio.addEventListener('ended', enableMapButton);
+    const btnToMilan = document.getElementById('btn-to-milan');
+    const btnToBergamo = document.getElementById('btn-to-bergamo');
 
-    // 2. Obsługa kodów PIN
-    btnSkipIntro.addEventListener('click', () => {
+    // OBSŁUGA BOLONII
+    bolognaIntroAudio.addEventListener('ended', () => {
+      btnStartBologna.removeAttribute('disabled');
+      btnStartBologna.innerHTML = "<span>Rozpocznij spacer</span> ➔";
+    });
+
+    btnSkipBologna.addEventListener('click', () => {
       const pin = prompt("Podaj kod PIN:");
       if (pin === "1410") {
-        // Zwykłe pominięcie: odblokowuje mapę od punktu 1
-        enableMapButton();
-        introScreen.style.display = 'none';
+        btnStartBologna.removeAttribute('disabled');
+        bolognaIntroScreen.style.display = 'none';
         mapScreen.style.display = 'flex';
-        initMap(1);
+        initMap('bologna', 1);
       } else if (pin === "9892") {
-        // Tryb mistrzowski: wszystkie punkty odblokowane, przeskok od razu do punktu 10
-        unlockedUpTo = stops.length; // odblokuj wszystkie 10
-        enableMapButton();
-        introScreen.style.display = 'none';
+        bolognaUnlocked = bolognaStops.length;
+        bolognaIntroScreen.style.display = 'none';
         mapScreen.style.display = 'flex';
-        initMap(10); // ustaw od razu przystanek 10
+        initMap('bologna', 10);
       } else if (pin !== null) {
         alert("❌ Nieprawidłowy kod PIN!");
       }
     });
 
-    function enableMapButton() {
-      btnStartMap.removeAttribute('disabled');
-      btnStartMap.innerHTML = "<span>Rozpocznij spacer</span> ➔";
-    }
-
-    btnStartMap.addEventListener('click', () => {
-      introScreen.style.display = 'none';
+    btnStartBologna.addEventListener('click', () => {
+      bolognaIntroScreen.style.display = 'none';
       mapScreen.style.display = 'flex';
-      initMap(1);
+      initMap('bologna', 1);
     });
 
-    function initMap(startPointId = 1) {
-      if (!map) {
-        map = L.map('map').setView([44.4938, 11.3436], 14);
+    // PRZEJŚCIE DO POCIĄGU ITALO MEDIOLAN
+    btnToMilan.addEventListener('click', () => {
+      mapScreen.style.display = 'none';
+      milanTrainScreen.style.display = 'flex';
+      window.scrollTo(0, 0);
+    });
 
+    // OBSŁUGA EKRANU ITALO (MEDIOLAN)
+    milanIntroAudio.addEventListener('ended', () => {
+      btnStartMilanMap.removeAttribute('disabled');
+      btnStartMilanMap.innerHTML = "<span>Rozpocznij Mediolan</span> ➔";
+    });
+
+    btnSkipMilan.addEventListener('click', () => {
+      const pin = prompt("Podaj kod PIN dla Mediolanu:");
+      if (pin === "1410") {
+        btnStartMilanMap.removeAttribute('disabled');
+        milanTrainScreen.style.display = 'none';
+        mapScreen.style.display = 'flex';
+        tabMilan.style.display = 'block';
+        initMap('milan', 1);
+      } else if (pin === "9892") {
+        milanUnlocked = milanStops.length;
+        milanTrainScreen.style.display = 'none';
+        mapScreen.style.display = 'flex';
+        tabMilan.style.display = 'block';
+        initMap('milan', 6); // Przeskok od razu do Duomo
+      } else if (pin !== null) {
+        alert("❌ Nieprawidłowy kod PIN!");
+      }
+    });
+
+    btnStartMilanMap.addEventListener('click', () => {
+      milanTrainScreen.style.display = 'none';
+      mapScreen.style.display = 'flex';
+      tabMilan.style.display = 'block';
+      initMap('milan', 1);
+    });
+
+    // PRZEŁĄCZNIK ZAKŁADEK MIAST
+    tabBologna.addEventListener('click', () => {
+      if (currentCity !== 'bologna') switchCity('bologna', bolognaUnlocked);
+    });
+
+    tabMilan.addEventListener('click', () => {
+      if (currentCity !== 'milan') switchCity('milan', milanUnlocked);
+    });
+
+    function switchCity(city, targetStopId) {
+      currentCity = city;
+      if (city === 'bologna') {
+        tabBologna.classList.add('active');
+        tabMilan.classList.remove('active');
+      } else {
+        tabMilan.classList.add('active');
+        tabBologna.classList.remove('active');
+      }
+      renderCity(city, targetStopId);
+    }
+
+    // INICJALIZACJA I RYSOWANIE MAPY
+    function initMap(city, startStopId) {
+      currentCity = city;
+      if (!map) {
+        map = L.map('map');
         L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
           attribution: '&copy; OpenStreetMap contributors',
           maxZoom: 19
         }).addTo(map);
-
-        const pathCoords = stops.map(s => s.coords);
-        L.polyline(pathCoords, {
-          color: '#c2410c',
-          weight: 4,
-          dashArray: '6, 8',
-          opacity: 0.8
-        }).addTo(map);
-
-        stops.forEach((stop) => {
-          const markerEl = document.createElement('div');
-          markerEl.className = 'custom-marker';
-          markerEl.id = `marker-${stop.id}`;
-          markerEl.innerText = stop.id;
-
-          const icon = L.divIcon({
-            html: markerEl,
-            className: '',
-            iconSize: [28, 28]
-          });
-
-          const marker = L.marker(stop.coords, { icon: icon }).addTo(map);
-          marker.on('click', () => {
-            if (stop.id <= unlockedUpTo) {
-              selectStop(stop.id);
-            } else {
-              alert(`🔒 Ten punkt jest jeszcze zablokowany! Wysłuchaj najpierw punktu ${unlockedUpTo}.`);
-            }
-          });
-
-          markers.push(marker);
-        });
       }
+      switchCity(city, startStopId);
+    }
 
-      updateMarkersUI();
-      selectStop(startPointId);
+    function renderCity(city, targetStopId) {
+      const currentStops = city === 'bologna' ? bolognaStops : milanStops;
+      const currentUnlocked = city === 'bologna' ? bolognaUnlocked : milanUnlocked;
+
+      // Czyszczenie starych znaczników i linii
+      markers.forEach(m => map.removeLayer(m));
+      markers = [];
+      if (routeLine) map.removeLayer(routeLine);
+
+      // Rysowanie nowej trasy
+      const pathCoords = currentStops.map(s => s.coords);
+      routeLine = L.polyline(pathCoords, {
+        color: city === 'bologna' ? '#c2410c' : '#dc2626',
+        weight: 4,
+        dashArray: '6, 8',
+        opacity: 0.8
+      }).addTo(map);
+
+      // Dodawanie pinezek
+      currentStops.forEach(stop => {
+        const markerEl = document.createElement('div');
+        markerEl.className = 'custom-marker';
+        markerEl.id = `marker-${stop.id}`;
+        markerEl.innerText = stop.id;
+
+        const icon = L.divIcon({
+          html: markerEl,
+          className: '',
+          iconSize: [28, 28]
+        });
+
+        const marker = L.marker(stop.coords, { icon: icon }).addTo(map);
+        marker.on('click', () => {
+          const unlockedLimit = currentCity === 'bologna' ? bolognaUnlocked : milanUnlocked;
+          if (stop.id <= unlockedLimit) {
+            selectStop(stop.id);
+          } else {
+            alert(`🔒 Ten punkt jest jeszcze zablokowany! Wysłuchaj najpierw punktu ${unlockedLimit}.`);
+          }
+        });
+
+        markers.push(marker);
+      });
+
+      map.fitBounds(routeLine.getBounds(), { padding: [40, 40] });
+      selectStop(targetStopId);
     }
 
     function selectStop(id) {
-      currentSelected = id;
-      const stop = stops.find(s => s.id === id);
+      currentSelectedId = id;
+      const currentStops = currentCity === 'bologna' ? bolognaStops : milanStops;
+      const currentUnlocked = currentCity === 'bologna' ? bolognaUnlocked : milanUnlocked;
+      const stop = currentStops.find(s => s.id === id);
 
       panelTitle.innerText = `${stop.id}. ${stop.title}`;
-      panelCounter.innerText = `${stop.id} / ${stops.length}`;
-      panelBadge.innerText = id < unlockedUpTo ? "Odsłuchane" : "Aktualny cel";
+      panelCounter.innerText = `${stop.id} / ${currentStops.length}`;
+      panelBadge.innerText = id < currentUnlocked ? "Odsłuchane" : "Aktualny cel";
 
       stopAudioSource.src = stop.file;
       stopAudio.load();
       map.panTo(stop.coords, { animate: true, duration: 0.8 });
 
       updateMarkersUI();
+      checkBannersVisibility();
     }
 
     function updateMarkersUI() {
-      stops.forEach((s) => {
+      const currentStops = currentCity === 'bologna' ? bolognaStops : milanStops;
+      const currentUnlocked = currentCity === 'bologna' ? bolognaUnlocked : milanUnlocked;
+      const activeClass = currentCity === 'bologna' ? 'marker-active-bologna' : 'marker-active-milan';
+
+      currentStops.forEach((s) => {
         const el = document.getElementById(`marker-${s.id}`);
         if (!el) return;
 
         el.className = 'custom-marker';
 
-        if (s.id === currentSelected) {
-          el.classList.add('marker-active');
-        } else if (s.id <= unlockedUpTo) {
+        if (s.id === currentSelectedId) {
+          el.classList.add('marker-active', activeClass);
+        } else if (s.id <= currentUnlocked) {
           el.classList.add('marker-completed');
         } else {
           el.classList.add('marker-locked');
@@ -503,20 +726,40 @@
       });
     }
 
-    // Odsłuchanie punktu
+    // ODTWARZANIE I ODBLOKOWYWANIE KOLEJNYCH PRZYSTANKÓW
     stopAudio.addEventListener('ended', () => {
-      if (currentSelected === stops.length) {
-        // Odsłuchano ostatni 10. punkt – pojawia się przycisk Mediolan
-        btnMilan.style.display = 'block';
-        btnMilan.scrollIntoView({ behavior: 'smooth' });
-      } else if (currentSelected === unlockedUpTo && unlockedUpTo < stops.length) {
-        unlockedUpTo++;
-        selectStop(unlockedUpTo);
+      if (currentCity === 'bologna') {
+        if (currentSelectedId === bolognaStops.length) {
+          btnToMilan.style.display = 'block';
+          btnToMilan.scrollIntoView({ behavior: 'smooth' });
+        } else if (currentSelectedId === bolognaUnlocked && bolognaUnlocked < bolognaStops.length) {
+          bolognaUnlocked++;
+          selectStop(bolognaUnlocked);
+        }
+      } else if (currentCity === 'milan') {
+        if (currentSelectedId === milanStops.length) {
+          btnToBergamo.style.display = 'block';
+          btnToBergamo.scrollIntoView({ behavior: 'smooth' });
+        } else if (currentSelectedId === milanUnlocked && milanUnlocked < milanStops.length) {
+          milanUnlocked++;
+          selectStop(milanUnlocked);
+        }
       }
     });
 
-    btnMilan.addEventListener('click', () => {
-      alert("Świetnie! Kolejny etap podróży: MEDIOLAN.");
+    function checkBannersVisibility() {
+      if (currentCity === 'bologna') {
+        btnToBergamo.style.display = 'none';
+        btnToMilan.style.display = (bolognaUnlocked === bolognaStops.length && currentSelectedId === 10) ? 'block' : 'none';
+      } else if (currentCity === 'milan') {
+        btnToMilan.style.display = 'none';
+        btnToBergamo.style.display = (milanUnlocked === milanStops.length && currentSelectedId === 6) ? 'block' : 'none';
+      }
+    }
+
+    // Kliknięcie kafelka Bergamo
+    btnToBergamo.addEventListener('click', () => {
+      alert("Rozpoczynamy przygotowanie etapu Bergamo: Dzień drugi!");
     });
   </script>
 </body>
