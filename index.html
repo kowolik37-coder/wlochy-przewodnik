@@ -279,7 +279,7 @@
       <span>Otwórz mapę zwiedzania</span>
       <span>🔒</span>
     </button>
-    <button id="btn-skip-intro" class="btn-skip">Pomiń wstęp (odblokuj ręcznie)</button>
+    <button id="btn-skip-intro" class="btn-skip">Pomiń wstęp (wymagany kod PIN)</button>
   </div>
 
   <!-- Widok 2: Interaktywna mapa ze spacerem -->
@@ -390,8 +390,22 @@
     const stopAudioSource = document.getElementById('stop-audio-source');
     const btnMilan = document.getElementById('btn-milan');
 
+    // 1. Naturalne odblokowanie po zakończeniu odsłuchu wstępu
     introAudio.addEventListener('ended', enableMapButton);
-    btnSkipIntro.addEventListener('click', enableMapButton);
+
+    // 2. Ręczne odblokowanie z kodem PIN 1410
+    btnSkipIntro.addEventListener('click', () => {
+      const pin = prompt("Podaj kod odblokowujący wstęp:");
+      if (pin === "1410") {
+        enableMapButton();
+        // Opcjonalnie: od razu przejdź na mapę
+        introScreen.style.display = 'none';
+        mapScreen.style.display = 'flex';
+        initMap();
+      } else if (pin !== null) {
+        alert("❌ Nieprawidłowy kod PIN!");
+      }
+    });
 
     function enableMapButton() {
       btnStartMap.removeAttribute('disabled');
@@ -409,7 +423,7 @@
 
       map = L.map('map').setView([44.4938, 11.3436], 14);
 
-      // Czysty, w pełni darmowy kafelek OpenStreetMap (bez wymogu kluczy API)
+      // Czysty kafelek OpenStreetMap (darmowy i bez kluczy)
       L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap contributors',
         maxZoom: 19
