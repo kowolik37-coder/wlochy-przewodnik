@@ -309,7 +309,6 @@
   <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    // 10 Przystanków w Bolonii
     const stops = [
       {
         id: 1,
@@ -410,7 +409,8 @@
 
       map = L.map('map').setView([44.4938, 11.3436], 14);
 
-L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      // Czysty, w pełni darmowy kafelek OpenStreetMap (bez wymogu kluczy API)
+      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap contributors',
         maxZoom: 19
       }).addTo(map);
