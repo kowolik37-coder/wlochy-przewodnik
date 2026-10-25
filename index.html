@@ -36,6 +36,26 @@
       display: flex;
       flex-direction: column;
       overflow-x: hidden;
+      position: relative;
+    }
+
+    /* ZNACZNIK AUTORSKI W ROGU */
+    .author-watermark {
+      position: fixed;
+      bottom: 8px;
+      right: 12px;
+      z-index: 9999;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      color: rgba(255, 255, 255, 0.35);
+      background: rgba(15, 23, 42, 0.6);
+      padding: 3px 8px;
+      border-radius: 6px;
+      backdrop-filter: blur(4px);
+      pointer-events: none;
+      user-select: none;
+      border: 1px solid rgba(255, 255, 255, 0.06);
     }
 
     .screen-view {
@@ -436,6 +456,9 @@
 </head>
 <body>
 
+  <!-- SUBTELNY ZNACZNIK AUTORSKI W ROGU -->
+  <div class="author-watermark">Made by Kriss 2026</div>
+
   <!-- EKRAN 1: Wstęp do Bolonii -->
   <div id="bologna-intro-screen" class="screen-view">
     <div class="city-backdrop">
@@ -757,21 +780,19 @@
     const jumpMilan = document.getElementById('jump-milan');
     const jumpBergamo = document.getElementById('jump-bergamo');
 
-    // KOD MASTER: 1509 - PEŁNE ODBLOKOWANIE WSZYSTKIEGO
+    // KOD MASTER: 1509
     function activateMasterMode() {
       isMasterUnlocked = true;
       bolognaUnlocked = bolognaStops.length;
       milanUnlocked = milanStops.length;
       bergamoUnlocked = bergamoStops.length;
 
-      // Aktywacja zakładek i kafelków na zawsze
       tabMilan.style.display = 'block';
       tabBergamo.style.display = 'block';
       timeJumpContainer.style.display = 'block';
       jumpMilan.style.display = 'flex';
       jumpBergamo.style.display = 'flex';
 
-      // Przejście do mapy
       bolognaIntroScreen.style.display = 'none';
       milanTrainScreen.style.display = 'none';
       bergamoTrainScreen.style.display = 'none';
